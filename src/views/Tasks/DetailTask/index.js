@@ -19,6 +19,7 @@ import { DialogActions } from "@material-ui/core";
 import { DialogContent } from "@material-ui/core";
 import { DialogTitle } from "@material-ui/core";
 import { DialogContentText } from "@material-ui/core";
+import { CircularProgress } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   leftAlignDialogActions: {
@@ -108,6 +109,16 @@ const DetailTask = ({ open, setOpen }) => {
                 <MenuItem value={60}>Larga: 1h</MenuItem>
               </Select>
             </FormControl>
+
+              <FormControl variant="filled" className={classes.formControl}>
+              <Button
+                aria-label="Cerrar Alert Dialog"
+                id="CerrarAlertDialog"
+                color="primary"
+              >
+                Editar Tiempo
+              </Button>
+            </FormControl>
           </List>
           <List>
             <FormControl variant="filled" className={classes.formControl}>
@@ -137,23 +148,20 @@ const DetailTask = ({ open, setOpen }) => {
                 }}
               />
             </FormControl>
-
-            <Button
-              aria-label="Cerrar Alert Dialog"
-              id="CerrarAlertDialog"
-              color="primary"
-            >
-              Editar
-            </Button>
+          </List>
+          <List>
+          <CircularProgress variant="determinate" value={25}>
+          <InputLabel id="demo-simple-select-filled-label">
+                Duracion
+              </InputLabel>
+          </CircularProgress>
           </List>
         </DialogContent>
         <DialogActions className={classes.leftAlignDialogActions}>
           <Button variant="contained" color="secondary">
             Eliminar Tarea
           </Button>
-          <Button variant="contained" >
-            Editar Tarea
-          </Button>
+          <Button variant="contained">Editar Tarea</Button>
         </DialogActions>
       </Dialog>
     </div>

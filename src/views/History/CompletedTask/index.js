@@ -1,19 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import MUIDataTable from "mui-datatables";
 import users from "./data";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
-import DetailTask from "./DetailTask";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import IconButton from "@material-ui/core/IconButton";
 
-const Tasks = () => {
-  const [open, setOpen] = useState(false);
-  const [orderDetail, setOrderDetail] = useState("");
-
-  const handleClickOpen = (rowData) => {
-    setOpen(true);
-    setOrderDetail(rowData);
-  };
+const CompletedTask = () => {
+ 
   const getMuiTheme = () =>
     createMuiTheme({
       palette: {
@@ -56,25 +47,6 @@ const Tasks = () => {
         filter: false,
       },
     },
-    {
-      name: "address",
-      label: "Detalle",
-      options: {
-        filter: false,
-        sort: false,
-        customBodyRender: (value, tableMeta, updateValue) => {
-          return (
-            <IconButton
-              aria-label={`visibility icon ${tableMeta.rowIndex}`}
-              id={`icon ${tableMeta.rowIndex}`}
-              onClick={() => handleClickOpen(tableMeta.rowData)}
-            >
-              <VisibilityIcon />
-            </IconButton>
-          );
-        },
-      },
-    },
   ];
 
   const options = {
@@ -102,26 +74,21 @@ const Tasks = () => {
         displayRows: "de",
       },
       viewColumns: {
-        title: "Columnas",
+        title: "Columnas", 
       },
     },
   };
 
   return (
     <MuiThemeProvider theme={getMuiTheme()}>
-      <h1>Admin Tareas</h1>
       <MUIDataTable
         title={"Tareas Pendientes"}
         data={users}
         columns={columns}
         options={options}
       />
-      {open && (
-        <DetailTask open={open} setOpen={setOpen} orderDetail={orderDetail} />
-      )}
-      
     </MuiThemeProvider>
   );
 };
 
-export default Tasks;
+export default CompletedTask;

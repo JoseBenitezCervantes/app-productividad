@@ -2,24 +2,21 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItem from "@material-ui/core/ListItem";
 import List from "@material-ui/core/List";
-import Divider from "@material-ui/core/Divider";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Slide from "@material-ui/core/Slide";
-import { FormControl, TextField } from "@material-ui/core";
+import { FormControl, Grid, IconButton, TextField } from "@material-ui/core";
 import { InputLabel } from "@material-ui/core";
 import { Select } from "@material-ui/core";
 import { MenuItem } from "@material-ui/core";
-import { FormHelperText } from "@material-ui/core";
 import { DialogActions } from "@material-ui/core";
 import { DialogContent } from "@material-ui/core";
-import { DialogTitle } from "@material-ui/core";
-import { DialogContentText } from "@material-ui/core";
-import { CircularProgress } from "@material-ui/core";
+import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
+import PauseIcon from "@material-ui/icons/Pause";
+import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
+import Paper from "@material-ui/core/Paper";
 
 const useStyles = makeStyles((theme) => ({
   leftAlignDialogActions: {
@@ -41,6 +38,12 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     minWidth: 120,
   },
+  fontTime: {
+    fontSize: "10rem",
+  },
+  timerIcons: {
+    textAlign: "center"
+  }
 }));
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -88,6 +91,7 @@ const DetailTask = ({ open, setOpen }) => {
               id="outlined-multiline-static"
               label="Descripcion"
               multiline
+              fullWidth
               rows={4}
               defaultValue="Default Value Default Value vDefault ValuevDefault Value"
               variant="outlined"
@@ -110,7 +114,7 @@ const DetailTask = ({ open, setOpen }) => {
               </Select>
             </FormControl>
 
-              <FormControl variant="filled" className={classes.formControl}>
+            <FormControl variant="filled" className={classes.formControl}>
               <Button
                 aria-label="Cerrar Alert Dialog"
                 id="CerrarAlertDialog"
@@ -150,11 +154,26 @@ const DetailTask = ({ open, setOpen }) => {
             </FormControl>
           </List>
           <List>
-          <CircularProgress variant="determinate" value={25}>
-          <InputLabel id="demo-simple-select-filled-label">
-                Duracion
-              </InputLabel>
-          </CircularProgress>
+            <Grid container spacing={1} className={classes.timerIcons}>
+              <Grid item xs={12}>
+                <h1 className={classes.fontTime}>05:45</h1>
+              </Grid>
+              <Grid item xs={4}>
+                <IconButton>
+                  <PlayCircleOutlineIcon fontSize={"large"} />
+                </IconButton>
+              </Grid>
+              <Grid item xs={4}> 
+                <IconButton >
+                  <PauseIcon  fontSize={"large"}/>
+                </IconButton>
+              </Grid>
+              <Grid item xs={4}>
+                <IconButton>
+                  <SettingsBackupRestoreIcon fontSize={"large"} />
+                </IconButton>
+              </Grid>
+            </Grid>
           </List>
         </DialogContent>
         <DialogActions className={classes.leftAlignDialogActions}>

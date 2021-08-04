@@ -5,6 +5,8 @@ import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 import DetailTask from "./DetailTask";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import IconButton from "@material-ui/core/IconButton";
+import { Button } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 
 const Tasks = () => {
   const [open, setOpen] = useState(false);
@@ -18,10 +20,10 @@ const Tasks = () => {
     createMuiTheme({
       palette: {
         primary: {
-          contrastText: "#000000",
+          contrastText: "withe",
           dark: "#3f51b5",
-          main: "#000000",
-          light: "#000000",
+          main: "#3f51b5",
+          light: "#3f51b5",
         },
       },
     });
@@ -110,6 +112,17 @@ const Tasks = () => {
   return (
     <MuiThemeProvider theme={getMuiTheme()}>
       <h1>Admin Tareas</h1>
+
+      <Box display="flex" flexDirection="row-reverse" margin={"1rem"}>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => handleClickOpen("NEW")}
+        >
+          Nueva Tarea
+        </Button>
+      </Box>
+
       <MUIDataTable
         title={"Tareas Pendientes"}
         data={users}
@@ -119,7 +132,6 @@ const Tasks = () => {
       {open && (
         <DetailTask open={open} setOpen={setOpen} orderDetail={orderDetail} />
       )}
-      
     </MuiThemeProvider>
   );
 };

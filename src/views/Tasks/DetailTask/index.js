@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -16,7 +16,7 @@ import { DialogContent } from "@material-ui/core";
 import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
 import PauseIcon from "@material-ui/icons/Pause";
 import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
-import Paper from "@material-ui/core/Paper";
+import { useForm } from "../../../hooks/useForm";
 
 const useStyles = makeStyles((theme) => ({
   leftAlignDialogActions: {
@@ -42,26 +42,63 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "10rem",
   },
   timerIcons: {
-    textAlign: "center"
-  }
+    textAlign: "center",
+  },
+  playIcon: {
+    textAlign: "right",
+  },
+  pauseIcon: {
+    textAlign: "center",
+  },
+  restartIcon: {
+    textAlign: "left",
+  },
 }));
 
-const Transition = React.forwardRef(function Transition(props, ref) {
+const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const DetailTask = ({ open, setOpen }) => {
+const DetailTask = ({ open, setOpen, orderDetail }) => {
   const classes = useStyles();
   const handleClose = () => {
     setOpen(false);
   };
 
-  const [age, setAge] = React.useState("");
-
-  const handleChange = (event) => {
-    setAge(event.target.value);
+  const initialForm = {
+    name: "",
+    description: "",
   };
 
+  const [formValues, handleInputChange, reset] = useForm(initialForm);
+  const [time, setTime] = useState({
+    hours: 0,
+    minutes: 30,
+    valueSize: "short",
+  });
+  const [orderDetailState, setOrderDetailState] = useState(orderDetail);
+  const [editTime, setEditTime] = useState(false);
+  const handleChange = (event) => {
+    const valueSize = event.target.value;
+    if (valueSize === "short") {
+      setTime({ hours: 0, minutes: 30, valueSize });
+    } else if (valueSize === "medium") {
+      setTime({ hours: 0, minutes: 45, valueSize });
+    } else if (valueSize === "large") {
+      setTime({ hours: 1, minutes: 0, valueSize });
+    }
+    setEditTime(false);
+  };
+
+  const onclickEditable = () => {
+    setTime({ hours: 0, minutes: 0, valueSize: "" });
+    setEditTime(!editTime);
+  };
+
+  const onEditTime = (event) => {
+    const valueSize = event.target.value;
+    setTime({ hours: valueSize, minutes: 0, valueSize: "" });
+  };
   return (
     <div>
       <Dialog
@@ -75,9 +112,11 @@ const DetailTask = ({ open, setOpen }) => {
       >
         <AppBar className={classes.appBar}>
           <Toolbar>
-            <Typography variant="h3" className={classes.title}>
-              Nombre de la tarea
-            </Typography>
+            {orderDetailState !== "NEW" && (
+              <Typography variant="h3" className={classes.title}>
+                Nombre de la tarea
+              </Typography>
+            )}
             <Button autoFocus color="white" onClick={handleClose}>
               <Typography variant="h6" className={classes.exit}>
                 Salir
@@ -86,6 +125,19 @@ const DetailTask = ({ open, setOpen }) => {
           </Toolbar>
         </AppBar>
         <DialogContent>
+          {orderDetailState == "NEW" && (
+            <List>
+              <TextField
+                label="Nombre De Tarea"
+                fullWidth
+                rows={4}
+                variant="outlined"
+                name="name"
+                value={formValues.name}
+                onChange={handleInputChange}
+              />
+            </List>
+          )}
           <List>
             <TextField
               id="outlined-multiline-static"
@@ -93,8 +145,11 @@ const DetailTask = ({ open, setOpen }) => {
               multiline
               fullWidth
               rows={4}
-              defaultValue="Default Value Default Value vDefault ValuevDefault Value"
+              defaultValue=""
               variant="outlined"
+              name="description"
+              value={formValues.description}
+              onChange={handleInputChange}
             />
           </List>
           <List>
@@ -105,12 +160,12 @@ const DetailTask = ({ open, setOpen }) => {
               <Select
                 labelId="demo-simple-select-filled-label"
                 id="demo-simple-select-filled"
-                value={age}
                 onChange={handleChange}
+                value={time.valueSize}
               >
-                <MenuItem value={30}>Corta: 30 min</MenuItem>
-                <MenuItem value={45}>media: 45 min</MenuItem>
-                <MenuItem value={60}>Larga: 1h</MenuItem>
+                <MenuItem value={"short"}>Corta: 30 min</MenuItem>
+                <MenuItem value={"medium"}>Media: 45 min</MenuItem>
+                <MenuItem value={"large"}>Larga: 1h</MenuItem>
               </Select>
             </FormControl>
 
@@ -119,69 +174,86 @@ const DetailTask = ({ open, setOpen }) => {
                 aria-label="Cerrar Alert Dialog"
                 id="CerrarAlertDialog"
                 color="primary"
+                onClick={() => onclickEditable()}
               >
                 Editar Tiempo
               </Button>
             </FormControl>
           </List>
-          <List>
-            <FormControl variant="filled" className={classes.formControl}>
-              <InputLabel id="demo-simple-select-filled-label">
-                Horas
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-filled-label"
-                id="demo-simple-select-filled"
-                value={age}
-                onChange={handleChange}
-              >
-                <MenuItem value={0}>0h</MenuItem>
-                <MenuItem value={1}>1h</MenuItem>
-                <MenuItem value={2}>2h</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl variant="filled" className={classes.formControl}>
-              <TextField
-                id="outlined-number"
-                label="Minutos"
-                type="number"
-                variant="filled"
-                maxRows="2"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-            </FormControl>
-          </List>
-          <List>
-            <Grid container spacing={1} className={classes.timerIcons}>
-              <Grid item xs={12}>
-                <h1 className={classes.fontTime}>05:45</h1>
+          {editTime && (
+            <List>
+              <FormControl variant="filled" className={classes.formControl}>
+                <InputLabel id="demo-simple-select-filled-label">
+                  Horas
+                </InputLabel>
+                <Select
+                  labelId="demo-simple-select-filled-label"
+                  id="demo-simple-select-filled"
+                  onChange={onEditTime}
+                >
+                  <MenuItem value={0}>0h</MenuItem>
+                  <MenuItem value={1}>1h</MenuItem>
+                  <MenuItem value={2}>2h</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl variant="filled" className={classes.formControl}>
+                <TextField
+                  id="outlined-number"
+                  label="Minutos"
+                  type="number"
+                  variant="filled"
+                  maxRows="2"
+                  name="timeMinutes"
+                  value={time.minutes}
+                  onChange={(e) => {
+                    setTime({ ...time, minutes: e.target.value });
+                  }}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </FormControl>
+            </List>
+          )}
+          {orderDetailState !== "NEW" && (
+            <List>
+              <Grid container spacing={1} className={classes.timerIcons}>
+                <Grid item xs={12}>
+                  <h1 className={classes.fontTime}>05:45</h1>
+                </Grid>
+                <Grid item xs={4} className={classes.playIcon}>
+                  <IconButton>
+                    <PlayCircleOutlineIcon fontSize={"large"} />
+                  </IconButton>
+                </Grid>
+                <Grid item xs={4} className={classes.pauseIcon}>
+                  <IconButton>
+                    <PauseIcon fontSize={"large"} />
+                  </IconButton>
+                </Grid>
+                <Grid item xs={4} className={classes.restartIcon}>
+                  <IconButton>
+                    <SettingsBackupRestoreIcon fontSize={"large"} />
+                  </IconButton>
+                </Grid>
               </Grid>
-              <Grid item xs={4}>
-                <IconButton>
-                  <PlayCircleOutlineIcon fontSize={"large"} />
-                </IconButton>
-              </Grid>
-              <Grid item xs={4}> 
-                <IconButton >
-                  <PauseIcon  fontSize={"large"}/>
-                </IconButton>
-              </Grid>
-              <Grid item xs={4}>
-                <IconButton>
-                  <SettingsBackupRestoreIcon fontSize={"large"} />
-                </IconButton>
-              </Grid>
-            </Grid>
-          </List>
+            </List>
+          )}
         </DialogContent>
-        <DialogActions className={classes.leftAlignDialogActions}>
-          <Button variant="contained" color="secondary">
-            Eliminar Tarea
-          </Button>
-          <Button variant="contained">Editar Tarea</Button>
-        </DialogActions>
+        {orderDetailState == "NEW" ? (
+          <DialogActions className={classes.leftAlignDialogActions}>
+            <Button variant="contained" color="secondary">
+              Agregar Tarea
+            </Button>
+          </DialogActions>
+        ) : (
+          <DialogActions className={classes.leftAlignDialogActions}>
+            <Button variant="contained" color="secondary">
+              Eliminar Tarea
+            </Button>
+            <Button variant="contained">Editar Tarea</Button>
+          </DialogActions>
+        )}
       </Dialog>
     </div>
   );

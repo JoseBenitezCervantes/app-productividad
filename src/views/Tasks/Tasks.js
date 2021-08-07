@@ -17,12 +17,10 @@ const Tasks = () => {
       { statusTask: "NEW" },
     ],
   });
-  const [open, setOpen] = useState(false);
-  const [orderDetail, setOrderDetail] = useState("");
-  
+  const [orderDetail, setOrderDetail] = useState({ data: "", isOpen: false });
+
   const handleClickOpen = (rowData) => {
-    setOpen(true);
-    setOrderDetail(rowData);
+    setOrderDetail({ data: rowData[0], isOpen: true, type:"DETAIL" });
   };
   const getMuiTheme = () =>
     createMuiTheme({
@@ -36,6 +34,14 @@ const Tasks = () => {
       },
     });
   const columns = [
+    {
+      name: "id",
+      visible: false,
+      label: "id",
+      options: {
+        display: false,
+      },
+    },
     {
       name: "name",
       visible: false,
@@ -53,15 +59,22 @@ const Tasks = () => {
       },
     },
     {
-      name: "createdAt",
+      name: "creationDate",
       label: "Fecha",
       options: {
         filter: true,
       },
     },
     {
-      name: "status",
+      name: "initialTime",
       label: "Duracion",
+      options: {
+        filter: false,
+      },
+    },
+    {
+      name: "restTime",
+      label: "Restante",
       options: {
         filter: false,
       },
@@ -116,9 +129,15 @@ const Tasks = () => {
       },
     },
   };
-  if (loading) return <h1>Loading...</h1>;
-  console.log("🚀 ~ file: Tasks.js ~ line 14 ~ Tasks ~ data", data)
-
+  if (loading || error) return <h1>Loading...</h1>;
+  const arrData = Array.from(data.task, (x) => ({
+    id: x._id,
+    name: x.name,
+    description: x.description,
+    creationDate: x.creationDate,
+    initialTime: `0${x.initialTime[0]}:${x.initialTime[1]}`,
+    restTime: `0${x.restTime[0]}:${x.restTime[1]}`,
+  }));
   return (
     <MuiThemeProvider theme={getMuiTheme()}>
       <h1>Admin Tareas</h1>
@@ -127,7 +146,7 @@ const Tasks = () => {
         <Button
           variant="contained"
           color="secondary"
-          onClick={() => handleClickOpen("NEW")}
+          onClick={() => setOrderDetail({ data: {}, isOpen: true, type:"NEW" })}
         >
           Nueva Tarea
         </Button>
@@ -135,12 +154,12 @@ const Tasks = () => {
 
       <MUIDataTable
         title={"Tareas Pendientes"}
-        data={data.task}
+        data={arrData}
         columns={columns}
         options={options}
       />
-      {open && (
-        <DetailTask open={open} setOpen={setOpen} orderDetail={orderDetail} />
+      {orderDetail.isOpen && (
+        <DetailTask {...{ setOrderDetail, orderDetail,  }} />
       )}
     </MuiThemeProvider>
   );

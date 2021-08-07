@@ -1,17 +1,25 @@
 import React, { useState } from "react";
 import MUIDataTable from "mui-datatables";
-import users from "./data";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 import DetailTask from "./DetailTask";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import IconButton from "@material-ui/core/IconButton";
 import { Button } from "@material-ui/core";
 import { Box } from "@material-ui/core";
+import { useFetch } from "../../hooks/useFetch";
 
 const Tasks = () => {
+  const url = `${process.env.REACT_APP_SERVER_ARKON}/api/tasks/getTasks`;
+  const { data, loading, error } = useFetch(url, "POST", {
+    findStatus: [
+      { statusTask: "PAUSE" },
+      { statusTask: "RUN" },
+      { statusTask: "NEW" },
+    ],
+  });
   const [open, setOpen] = useState(false);
   const [orderDetail, setOrderDetail] = useState("");
-
+  
   const handleClickOpen = (rowData) => {
     setOpen(true);
     setOrderDetail(rowData);
@@ -29,7 +37,7 @@ const Tasks = () => {
     });
   const columns = [
     {
-      name: "id",
+      name: "name",
       visible: false,
       label: "Nombre",
       options: {
@@ -37,7 +45,7 @@ const Tasks = () => {
       },
     },
     {
-      name: "id",
+      name: "description",
       visible: false,
       label: "Descripcion",
       options: {
@@ -108,6 +116,8 @@ const Tasks = () => {
       },
     },
   };
+  if (loading) return <h1>Loading...</h1>;
+  console.log("🚀 ~ file: Tasks.js ~ line 14 ~ Tasks ~ data", data)
 
   return (
     <MuiThemeProvider theme={getMuiTheme()}>
@@ -125,7 +135,7 @@ const Tasks = () => {
 
       <MUIDataTable
         title={"Tareas Pendientes"}
-        data={users}
+        data={data.task}
         columns={columns}
         options={options}
       />

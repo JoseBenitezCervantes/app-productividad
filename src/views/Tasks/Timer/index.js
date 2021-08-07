@@ -55,7 +55,6 @@ const Timer = ({ detail }) => {
     useTimer({
       expiryTimestamp: timeI,
       autoStart: false,
-      onExpire: () => console.warn("onExpire called"),
     });
 
   const updateStatus = (statusTask) => {
@@ -65,6 +64,9 @@ const Timer = ({ detail }) => {
         restTime: [hours, minutes],
         id: task?._id,
         statusTask,
+        name: task.name,
+        description: task.description,
+        initialTime: task.initialTime
       }),
       headers: { "Content-Type": "application/json" },
     });
@@ -73,6 +75,9 @@ const Timer = ({ detail }) => {
   useEffect(() => {
     if ((seconds === 30 || seconds === 0) && isRunning) {
       updateStatus("RUN");
+    } 
+    if(minutes === 0 && seconds === 0){
+      updateStatus("FINISH");
     }
   }, [seconds]);
   return (

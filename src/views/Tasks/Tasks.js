@@ -130,13 +130,14 @@ const Tasks = () => {
     },
   };
   if (loading || error) return <h1>Loading...</h1>;
+  console.log("🚀 ~ file: Tasks.js ~ line 134 ~ arrData ~ data.task", data.task)
   const arrData = Array.from(data.task, (x) => ({
     id: x._id,
     name: x.name,
     description: x.description,
     creationDate: x.creationDate,
-    initialTime: `0${x.initialTime[0]}:${x.initialTime[1]}`,
-    restTime: `0${x.restTime[0]}:${x.restTime[1]}`,
+    initialTime: `0${x?.initialTime[0]}:${x.initialTime[1]}`,
+    restTime: `0${x?.restTime[0]}:${x.restTime[1]}`,
   }));
   return (
     <MuiThemeProvider theme={getMuiTheme()}>

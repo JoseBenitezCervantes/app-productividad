@@ -7,17 +7,14 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Slide from "@material-ui/core/Slide";
-import { FormControl, Grid, IconButton, TextField } from "@material-ui/core";
+import { FormControl, Grid, TextField } from "@material-ui/core";
 import { InputLabel } from "@material-ui/core";
 import { Select } from "@material-ui/core";
 import { MenuItem } from "@material-ui/core";
 import { DialogActions } from "@material-ui/core";
 import { DialogContent } from "@material-ui/core";
-import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
-import PauseIcon from "@material-ui/icons/Pause";
-import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
 import { useForm } from "../../../hooks/useForm";
-import { useFetch } from "../../../hooks/useFetch";
+import Timer from "../Timer";
 
 const useStyles = makeStyles((theme) => ({
   leftAlignDialogActions: {
@@ -60,22 +57,21 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const DetailTask = ({ setOrderDetail, orderDetail }) => {
+const DetailTask = ({ setTaskDetail, taskDetail }) => {
   const classes = useStyles();
   const handleClose = () => {
-    setOrderDetail({ data: "", isOpen: false, type: "" });
+    setTaskDetail({ data: "", isOpen: false, type: "" });
   };
-  const isDetail = orderDetail.type === "DETAIL";
+  const isDetail = taskDetail.type === "DETAIL";
   const [detail, setDetail] = useState({
     data: {},
     error: false,
     loading: isDetail,
   });
   const getData = async () => {
-    const url = `${process.env.REACT_APP_SERVER_ARKON}/api/tasks/get/${orderDetail.data}`;
+    const url = `${process.env.REACT_APP_SERVER_ARKON}/api/tasks/get/${taskDetail.data}`;
     const response = await fetch(url);
     const result = await response.json();
-    console.log("🚀 ~ file: index.js ~ line 78 ~ getData ~ result", result);
     setDetail({ data: result, error: false, loading: false });
   };
   useEffect(() => {
@@ -95,7 +91,7 @@ const DetailTask = ({ setOrderDetail, orderDetail }) => {
     minutes: 30,
     valueSize: "short",
   });
-  const [orderDetailState, setOrderDetailState] = useState(orderDetail);
+  const [taskDetailState, setTaskDetailState] = useState(taskDetail);
   const [editTime, setEditTime] = useState(false);
   const handleChange = (event) => {
     const valueSize = event.target.value;
@@ -122,7 +118,7 @@ const DetailTask = ({ setOrderDetail, orderDetail }) => {
   return (
     <div>
       <Dialog
-        open={orderDetail.isOpen}
+        open={taskDetail.isOpen}
         TransitionComponent={Transition}
         keepMounted
         fullScreen
@@ -136,7 +132,7 @@ const DetailTask = ({ setOrderDetail, orderDetail }) => {
           <>
             <AppBar className={classes.appBar}>
               <Toolbar>
-                {orderDetailState.type !== "NEW" && (
+                {taskDetailState.type !== "NEW" && (
                   <Typography variant="h3" className={classes.title}>
                     {detail.data?.task?.name ?? "Nueva Tarea"}
                   </Typography>
@@ -149,7 +145,41 @@ const DetailTask = ({ setOrderDetail, orderDetail }) => {
               </Toolbar>
             </AppBar>
             <DialogContent>
-              {orderDetailState.type == "NEW" && (
+              {isDetail && (
+                <List>
+                  <Grid container spacing={1}>
+                    <Grid item xs={12} sm={12} xl={2}>
+                      <Grid container spacing={1}>
+                        <Grid item xs={6}>
+                          <TextField
+                            label="Fecha De Registro"
+                            rows={4}
+                            variant="outlined"
+                            name="name"
+                            margin="dense"
+                            disabled
+                            value={detail.data?.task?.creationDate}
+                            onChange={handleInputChange}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <TextField
+                            label="Estimacion Inicial"
+                            rows={4}
+                            variant="outlined"
+                            margin="dense"
+                            name="name"
+                            disabled
+                            value={`0${detail.data?.task?.initialTime[0]}:${detail.data?.task?.initialTime[1]}`}
+                            onChange={handleInputChange}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </List>
+              )}
+              {taskDetailState.type == "NEW" && (
                 <List>
                   <TextField
                     label="Nombre De Tarea"
@@ -180,7 +210,8 @@ const DetailTask = ({ setOrderDetail, orderDetail }) => {
                   onChange={handleInputChange}
                 />
               </List>
-              {orderDetailState.type === "NEW" && (
+              {(taskDetailState.type === "NEW" ||
+                taskDetailState.type === "EDIT") && (
                 <>
                   <List>
                     <FormControl
@@ -259,30 +290,9 @@ const DetailTask = ({ setOrderDetail, orderDetail }) => {
                   )}
                 </>
               )}
-              <List>
-                <Grid container spacing={1} className={classes.timerIcons}>
-                  <Grid item xs={12}>
-                    <h1 className={classes.fontTime}>05:45</h1>
-                  </Grid>
-                  <Grid item xs={4} className={classes.playIcon}>
-                    <IconButton>
-                      <PlayCircleOutlineIcon fontSize={"large"} />
-                    </IconButton>
-                  </Grid>
-                  <Grid item xs={4} className={classes.pauseIcon}>
-                    <IconButton>
-                      <PauseIcon fontSize={"large"} />
-                    </IconButton>
-                  </Grid>
-                  <Grid item xs={4} className={classes.restartIcon}>
-                    <IconButton>
-                      <SettingsBackupRestoreIcon fontSize={"large"} />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              </List>
+              {isDetail && <Timer {...{ detail }} />}
             </DialogContent>
-            {orderDetailState.type == "NEW" ? (
+            {taskDetailState.type == "NEW" ? (
               <DialogActions className={classes.leftAlignDialogActions}>
                 <Button variant="contained" color="secondary">
                   Agregar Tarea

@@ -17,10 +17,10 @@ const Tasks = () => {
       { statusTask: "NEW" },
     ],
   });
-  const [orderDetail, setOrderDetail] = useState({ data: "", isOpen: false });
+  const [taskDetail, setTaskDetail] = useState({ data: "", isOpen: false });
 
   const handleClickOpen = (rowData) => {
-    setOrderDetail({ data: rowData[0], isOpen: true, type:"DETAIL" });
+    setTaskDetail({ data: rowData[0], isOpen: true, type:"DETAIL" });
   };
   const getMuiTheme = () =>
     createMuiTheme({
@@ -146,7 +146,7 @@ const Tasks = () => {
         <Button
           variant="contained"
           color="secondary"
-          onClick={() => setOrderDetail({ data: {}, isOpen: true, type:"NEW" })}
+          onClick={() => setTaskDetail({ data: {}, isOpen: true, type:"NEW" })}
         >
           Nueva Tarea
         </Button>
@@ -158,8 +158,8 @@ const Tasks = () => {
         columns={columns}
         options={options}
       />
-      {orderDetail.isOpen && (
-        <DetailTask {...{ setOrderDetail, orderDetail,  }} />
+      {taskDetail.isOpen && (
+        <DetailTask {...{ setTaskDetail, taskDetail,  }} />
       )}
     </MuiThemeProvider>
   );

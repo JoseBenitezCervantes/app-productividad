@@ -15,6 +15,7 @@ import { DialogActions } from "@material-ui/core";
 import { DialogContent } from "@material-ui/core";
 import { useForm } from "../../../hooks/useForm";
 import Timer from "../Timer";
+import Alert from "@material-ui/lab/Alert";
 
 const useStyles = makeStyles((theme) => ({
   leftAlignDialogActions: {
@@ -84,15 +85,87 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     name: "",
     description: detail.data?.task?.description ?? "",
   };
-
+  const [taskDetailState, setTaskDetailState] = useState(taskDetail);
+  const [editTime, setEditTime] = useState(false);
+  const [message, setMessage] = useState({
+    msg: "",
+    isShow: false,
+    isError: false,
+  });
   const [formValues, handleInputChange, reset] = useForm(initialForm);
   const [time, setTime] = useState({
     hours: 0,
     minutes: 30,
     valueSize: "short",
   });
-  const [taskDetailState, setTaskDetailState] = useState(taskDetail);
-  const [editTime, setEditTime] = useState(false);
+  const validData = () => {
+    if (
+      time.hours < 0 ||
+      time.hours > 2 ||
+      time.minutes < 0 ||
+      time.minutes > 60
+    ) {
+      setMessage({
+        msg: "Formato de tiempo incorrecto",
+        isShow: true,
+        isError: true,
+      });
+      return false;
+    }
+    if (time.hours === 0 && time.minutes === 0) {
+      setMessage({
+        msg: "Agrege Tiempoo",
+        isShow: true,
+        isError: true,
+      });
+      return false;
+    }
+    if (!formValues.name || !formValues.description) {
+      setMessage({
+        msg: "Descripcion o nombre incorrecto",
+        isShow: true,
+        isError: true,
+      });
+      return false;
+    }
+
+    return true;
+  };
+  const addTask = async () => {
+    if (validData()) {
+      console.log("🚀 ~ file: index.js ~ line 90 ~ DetailTask ~ time", time);
+      console.log(
+        "🚀 ~ file: index.js ~ line 89 ~ DetailTask ~ formValues",
+        formValues
+      );
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_ARKON}/api/tasks/add`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            name: formValues.name,
+            description: formValues.description,
+            initialTime: [time.hours, time.minutes],
+            restTime: [time.hours, time.minutes],
+          }),
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      const result = await response.json();
+      if (result.msg === "Tarea agregada") {
+        setMessage({
+          msg: "Tarea Agregada",
+          isShow: true,
+          isError: false,
+        });
+
+        setTimeout(() => {
+          window.location.href = "/admin/tasks";
+        }, 1000);
+      }
+    }
+  };
+
   const handleChange = (event) => {
     const valueSize = event.target.value;
     if (valueSize === "short") {
@@ -138,13 +211,25 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
                   </Typography>
                 )}
                 <Button autoFocus color="white" onClick={handleClose}>
-                  <Typography variant="h6" className={classes.exit}>
+                  <Typography
+                    variant="h6"
+                    className={classes.exit}
+                    onClick={() => {
+                      window.location.href = "/admin/tasks";
+                    }}
+                  >
                     Salir
                   </Typography>
                 </Button>
               </Toolbar>
             </AppBar>
             <DialogContent>
+              {message.isShow && (
+                <Alert severity={message.isError ? "error" : "success"}>
+                  {message.msg}
+                </Alert>
+              )}
+
               {isDetail && (
                 <List>
                   <Grid container spacing={1}>
@@ -294,7 +379,11 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
             </DialogContent>
             {taskDetailState.type == "NEW" ? (
               <DialogActions className={classes.leftAlignDialogActions}>
-                <Button variant="contained" color="secondary">
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => addTask()}
+                >
                   Agregar Tarea
                 </Button>
               </DialogActions>

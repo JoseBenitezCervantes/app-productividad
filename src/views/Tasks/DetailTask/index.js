@@ -7,7 +7,13 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Slide from "@material-ui/core/Slide";
-import { FormControl, Grid, TextField } from "@material-ui/core";
+import {
+  DialogContentText,
+  DialogTitle,
+  FormControl,
+  Grid,
+  TextField,
+} from "@material-ui/core";
 import { InputLabel } from "@material-ui/core";
 import { Select } from "@material-ui/core";
 import { MenuItem } from "@material-ui/core";
@@ -75,6 +81,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     const result = await response.json();
     setDetail({ data: result, error: false, loading: false });
   };
+
   useEffect(() => {
     if (isDetail) {
       getData();
@@ -87,6 +94,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
   };
   const [taskDetailState, setTaskDetailState] = useState(taskDetail);
   const [editTime, setEditTime] = useState(false);
+  const [showDialogDelete, setShowDialogDelete] = useState(false);
   const [message, setMessage] = useState({
     msg: "",
     isShow: false,
@@ -163,6 +171,23 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
           window.location.href = "/admin/tasks";
         }, 1000);
       }
+    }
+  };
+
+  const deleteTask = async () => {
+    setShowDialogDelete(false);
+    const url = `${process.env.REACT_APP_SERVER_ARKON}/api/tasks/delete/${taskDetail.data}`;
+    const response = await fetch(url, { method: "DELETE" });
+    const result = await response.json();
+    if (result) {
+      setMessage({
+        msg: "Tarea Eliminada",
+        isShow: true,
+        isError: false,
+      });
+      setTimeout(() => {
+        window.location.href = "/admin/tasks";
+      }, 1000);
     }
   };
 
@@ -389,7 +414,11 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
               </DialogActions>
             ) : (
               <DialogActions className={classes.leftAlignDialogActions}>
-                <Button variant="contained" color="secondary">
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => setShowDialogDelete(true)}
+                >
                   Eliminar Tarea
                 </Button>
                 <Button variant="contained">Editar Tarea</Button>
@@ -397,6 +426,29 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
             )}
           </>
         )}
+      </Dialog>
+
+      <Dialog
+        open={showDialogDelete}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Eliminar la tarea?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Seguro que desea eliminar la tarea?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowDialogDelete(false)} color="primary">
+            NO
+          </Button>
+          <Button onClick={() => deleteTask()} color="primary" autoFocus>
+            SI
+          </Button>
+        </DialogActions>
       </Dialog>
     </div>
   );

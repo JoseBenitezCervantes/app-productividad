@@ -20,6 +20,7 @@ import routes from "../routes";
 
 const drawerWidth = 240;
 
+//Mapeo de todas las rutas del layout admin
 const switchRoutes = (
   <Switch>
     {routes.map((prop, key) => {
@@ -38,6 +39,7 @@ const switchRoutes = (
   </Switch>
 );
 
+//Clases de material UI
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -73,7 +75,6 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
     ...theme.mixins.toolbar,
     justifyContent: "flex-end",
   },
@@ -155,7 +156,8 @@ const Admin = () => {
           </IconButton>
         </div>
         <Divider />
-        <List>
+        <List> 
+                                           {/* Se mapea el menu izquierdo */}
           {routes.map((rute, index) => (
             <NavLink
               to={rute.layout + rute.path}

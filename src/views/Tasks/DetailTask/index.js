@@ -66,32 +66,31 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const DetailTask = ({ setTaskDetail, taskDetail }) => {
   const classes = useStyles();
-  const handleClose = () => {
-    setTaskDetail({ data: "", isOpen: false, type: "" });
-  };
+
+  //Banderas para saber como debe actuar el componente
   const isDetail = taskDetail.type === "DETAIL";
+  const isNew = taskDetail.type === "NEW";
+  const isEdit = taskDetail.type === "EDIT";
+
+  ///  HOOKS ///
   const [detail, setDetail] = useState({
     data: {},
     error: false,
     loading: isDetail,
   });
-  const getData = async () => {
-    const url = `${process.env.REACT_APP_SERVER_ARKON}/api/tasks/get/${taskDetail.data}`;
-    const response = await fetch(url);
-    const result = await response.json();
-    setDetail({ data: result, error: false, loading: false });
-  };
-
+  //Obtiene el detalle de la tarea y la carga al state
   useEffect(() => {
+    const getData = async () => {
+      const url = `${process.env.REACT_APP_SERVER_ARKON}/api/tasks/get/${taskDetail.data}`;
+      const response = await fetch(url);
+      const result = await response.json();
+      setDetail({ data: result, error: false, loading: false });
+    };
     if (isDetail) {
       getData();
     }
   }, []);
 
-  const initialForm = {
-    name: "",
-    description: detail.data?.task?.description ?? "",
-  };
   const [editTime, setEditTime] = useState(false);
   const [showDialogDelete, setShowDialogDelete] = useState(false);
   const [message, setMessage] = useState({
@@ -99,15 +98,18 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     isShow: false,
     isError: false,
   });
-  const [formValues, handleInputChange, reset] = useForm(initialForm);
+  const [formValues, handleInputChange, reset] = useForm({
+    name: "",
+    description: detail.data?.task?.description ?? "",
+  });
   const [time, setTime] = useState({
     hours: 0,
     minutes: 30,
     valueSize: "short",
   });
 
+  //Funciona para validar los datos ingresados
   const validData = () => {
-    console.log("🚀 ~ file: index.js ~ line 124 ~ validData ~ time", time);
     if (
       time.hours < 0 ||
       time.hours > 2 ||
@@ -137,16 +139,12 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
       });
       return false;
     }
-
     return true;
   };
-  const addTask = async () => {
+
+  //    Funciones para CRUD  ///
+  const onAddTask = async () => {
     if (validData()) {
-      console.log("🚀 ~ file: index.js ~ line 90 ~ DetailTask ~ time", time);
-      console.log(
-        "🚀 ~ file: index.js ~ line 89 ~ DetailTask ~ formValues",
-        formValues
-      );
       const response = await fetch(
         `${process.env.REACT_APP_SERVER_ARKON}/api/tasks/add`,
         {
@@ -161,13 +159,13 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
         }
       );
       const result = await response.json();
+      //Si la tarea se agrego se muestra un mensaje
       if (result.msg === "Tarea agregada") {
         setMessage({
           msg: "Tarea Agregada",
           isShow: true,
           isError: false,
         });
-
         setTimeout(() => {
           window.location.href = "/admin/tasks";
         }, 1000);
@@ -175,7 +173,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     }
   };
 
-  const deleteTask = async () => {
+  const onDeleteTask = async () => {
     setShowDialogDelete(false);
     const url = `${process.env.REACT_APP_SERVER_ARKON}/api/tasks/delete/${taskDetail.data}`;
     const response = await fetch(url, { method: "DELETE" });
@@ -190,32 +188,6 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
         window.location.href = "/admin/tasks";
       }, 1000);
     }
-  };
-
-  const handleChange = (event) => {
-    const valueSize = event.target.value;
-    if (valueSize === "short") {
-      setTime({ hours: 0, minutes: 30, valueSize });
-    } else if (valueSize === "medium") {
-      setTime({ hours: 0, minutes: 45, valueSize });
-    } else if (valueSize === "large") {
-      setTime({ hours: 1, minutes: 0, valueSize });
-    }
-    setEditTime(false);
-  };
-
-  const onclickEditable = () => {
-    setTime({ hours: 0, minutes: 0, valueSize: "" });
-    setEditTime(!editTime);
-  };
-
-  const onEditTime = (event) => {
-    const valueSize = event.target.value;
-    setTime({ hours: valueSize, minutes: 0, valueSize: "" });
-  };
-
-  const onEdistTask = () => {
-    setTaskDetail({ ...taskDetail, type: "EDIT" });
   };
 
   const onSaveEdit = async () => {
@@ -243,6 +215,38 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     }
   };
 
+  // Eventos de los componentes
+
+  // Funcion para guardar los tiempos
+  const handleChange = (event) => {
+    const valueSize = event.target.value;
+    if (valueSize === "short") {
+      setTime({ hours: 0, minutes: 30, valueSize });
+    } else if (valueSize === "medium") {
+      setTime({ hours: 0, minutes: 45, valueSize });
+    } else if (valueSize === "large") {
+      setTime({ hours: 1, minutes: 0, valueSize });
+    }
+    setEditTime(false);
+  };
+
+  //Permite editar el tiempo  
+  const onClickEditable = () => {
+    setTime({ hours: 0, minutes: 0, valueSize: "" });
+    setEditTime(!editTime);
+  };
+
+   // Funcion para guardar los tiempos
+  const onEditTime = (event) => {
+    const valueSize = event.target.value;
+    setTime({ hours: valueSize, minutes: 0, valueSize: "" });
+  };
+
+  //Permite editar la tarea
+  const onEdistTask = () => {
+    setTaskDetail({ ...taskDetail, type: "EDIT" });
+  };
+
   return (
     <div>
       <Dialog
@@ -250,7 +254,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
         TransitionComponent={Transition}
         keepMounted
         fullScreen
-        onClose={handleClose}
+        onClose={() => setTaskDetail({ data: "", isOpen: false, type: "" })}
         aria-labelledby="alert-dialog-slide-title"
         aria-describedby="alert-dialog-slide-description"
       >
@@ -260,12 +264,12 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
           <>
             <AppBar className={classes.appBar}>
               <Toolbar>
-                {taskDetail.type !== "NEW" && (
+                {!isNew && (
                   <Typography variant="h3" className={classes.title}>
                     {detail.data?.task?.name ?? "Nueva Tarea"}
                   </Typography>
                 )}
-                <Button autoFocus color="white" onClick={handleClose}>
+                <Button autoFocus color="white" onClick={() => setTaskDetail({ data: "", isOpen: false, type: "" })}>
                   <Typography
                     variant="h6"
                     className={classes.exit}
@@ -319,20 +323,19 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
                   </Grid>
                 </List>
               )}
-              {taskDetail.type == "NEW" ||
-                (taskDetail.type == "EDIT" && (
-                  <List>
-                    <TextField
-                      label="Nombre De Tarea"
-                      fullWidth
-                      rows={4}
-                      variant="outlined"
-                      name="name"
-                      value={formValues.name}
-                      onChange={handleInputChange}
-                    />
-                  </List>
-                ))}
+              {(isNew || isEdit) && (
+                <List>
+                  <TextField
+                    label="Nombre De Tarea"
+                    fullWidth
+                    rows={4}
+                    variant="outlined"
+                    name="name"
+                    value={formValues.name}
+                    onChange={handleInputChange}
+                  />
+                </List>
+              )}
               <List>
                 <TextField
                   id="outlined-multiline-static"
@@ -351,7 +354,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
                   onChange={handleInputChange}
                 />
               </List>
-              {(taskDetail.type === "NEW" || taskDetail.type === "EDIT") && (
+              {(isNew || isEdit) && (
                 <>
                   <List>
                     <FormControl
@@ -381,7 +384,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
                         aria-label="Cerrar Alert Dialog"
                         id="CerrarAlertDialog"
                         color="primary"
-                        onClick={() => onclickEditable()}
+                        onClick={() => onClickEditable()}
                       >
                         Editar Tiempo
                       </Button>
@@ -432,18 +435,18 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
               )}
               {isDetail && <Timer {...{ detail }} />}
             </DialogContent>
-            {taskDetail.type == "NEW" && (
+            {isNew && (
               <DialogActions className={classes.leftAlignDialogActions}>
                 <Button
                   variant="contained"
                   color="secondary"
-                  onClick={() => addTask()}
+                  onClick={() => onAddTask()}
                 >
                   Agregar Tarea
                 </Button>
               </DialogActions>
             )}
-            {taskDetail.type == "EDIT" && (
+            {isEdit && (
               <DialogActions className={classes.leftAlignDialogActions}>
                 <Button
                   variant="contained"
@@ -489,7 +492,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
           <Button onClick={() => setShowDialogDelete(false)} color="primary">
             NO
           </Button>
-          <Button onClick={() => deleteTask()} color="primary" autoFocus>
+          <Button onClick={() => onDeleteTask()} color="primary" autoFocus>
             SI
           </Button>
         </DialogActions>

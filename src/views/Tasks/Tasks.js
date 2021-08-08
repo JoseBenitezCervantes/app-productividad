@@ -9,6 +9,8 @@ import { Box } from "@material-ui/core";
 import { useFetch } from "../../hooks/useFetch";
 
 const Tasks = () => {
+
+  //Se obtiene la lista de tareas activas
   const url = `${process.env.REACT_APP_SERVER_ARKON}/api/tasks/getTasks`;
   const { data, loading, error } = useFetch(url, "POST", {
     findStatus: [
@@ -22,6 +24,7 @@ const Tasks = () => {
   const handleClickOpen = (rowData) => {
     setTaskDetail({ data: rowData[0], isOpen: true, type:"DETAIL" });
   };
+
   const getMuiTheme = () =>
     createMuiTheme({
       palette: {
@@ -33,6 +36,9 @@ const Tasks = () => {
         },
       },
     });
+
+  
+  //Columnas para estructurar la tabla
   const columns = [
     {
       name: "id",
@@ -100,6 +106,7 @@ const Tasks = () => {
     },
   ];
 
+  //Opciones para customizar la tabla
   const options = {
     draggable: true,
     filter: false,
@@ -130,7 +137,8 @@ const Tasks = () => {
     },
   };
   if (loading || error) return <h1>Loading...</h1>;
-  console.log("🚀 ~ file: Tasks.js ~ line 134 ~ arrData ~ data.task", data.task)
+
+  //Filtra la data de la respuesta para llenar la tabla
   const arrData = Array.from(data.task, (x) => ({
     id: x._id,
     name: x.name,
@@ -139,6 +147,7 @@ const Tasks = () => {
     initialTime: `0${x?.initialTime[0]}:${x.initialTime[1]}`,
     restTime: `0${x?.restTime[0]}:${x.restTime[1]}`,
   }));
+  
   return (
     <MuiThemeProvider theme={getMuiTheme()}>
       <h1>Admin Tareas</h1>

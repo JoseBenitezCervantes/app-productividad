@@ -44,7 +44,8 @@ const useStyles = makeStyles((theme) => ({
 
 const Timer = ({ detail }) => {
   const { task } = detail.data;
-  console.log("🚀 ~ file: index.js ~ line 47 ~ Timer ~ task", task);
+
+  // Inicializa los tiempos del timer
   const restHrs = task?.restTime[0];
   const restMin = task?.restTime[1];
   const classes = useStyles();
@@ -57,6 +58,8 @@ const Timer = ({ detail }) => {
       autoStart: false,
     });
 
+
+  //Actualiza el tiempo y el estatus de la tarea
   const updateStatus = (statusTask) => {
     fetch(`${process.env.REACT_APP_SERVER_ARKON}/api/tasks/update`, {
       method: "PUT",
@@ -72,6 +75,7 @@ const Timer = ({ detail }) => {
     });
   };
 
+  //Guarda el estatus cada 30 segundos o cuando acaba
   useEffect(() => {
     if ((seconds === 30 || seconds === 0) && isRunning) {
       updateStatus("RUN");
@@ -80,6 +84,7 @@ const Timer = ({ detail }) => {
       updateStatus("FINISH");
     }
   }, [seconds]);
+
   return (
     <div>
       <List>

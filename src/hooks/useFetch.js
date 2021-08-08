@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-
+//Custom hook para obtener datos antes de renderizar un componente
 export const useFetch = (url, method = "GET", body) => {
   const isMounted = useRef(true);
   const [state, setState] = useState({

@@ -92,7 +92,6 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     name: "",
     description: detail.data?.task?.description ?? "",
   };
-  const [taskDetailState, setTaskDetailState] = useState(taskDetail);
   const [editTime, setEditTime] = useState(false);
   const [showDialogDelete, setShowDialogDelete] = useState(false);
   const [message, setMessage] = useState({
@@ -106,7 +105,9 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     minutes: 30,
     valueSize: "short",
   });
+
   const validData = () => {
+    console.log("🚀 ~ file: index.js ~ line 124 ~ validData ~ time", time);
     if (
       time.hours < 0 ||
       time.hours > 2 ||
@@ -213,6 +214,35 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     setTime({ hours: valueSize, minutes: 0, valueSize: "" });
   };
 
+  const onEdistTask = () => {
+    setTaskDetail({ ...taskDetail, type: "EDIT" });
+  };
+
+  const onSaveEdit = async () => {
+    if (validData()) {
+      const result = await fetch(
+        `${process.env.REACT_APP_SERVER_ARKON}/api/tasks/update`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            name: formValues.name,
+            description: formValues.description,
+            initialTime: [time.hours, time.minutes],
+            restTime: [time.hours, time.minutes],
+            id: taskDetail.data,
+            statusTask: "PAUSE",
+          }),
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      const response = await result.json();
+      console.log(
+        "🚀 ~ file: index.js ~ line 242 ~ onSaveEdit ~ response",
+        response
+      );
+    }
+  };
+
   return (
     <div>
       <Dialog
@@ -230,7 +260,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
           <>
             <AppBar className={classes.appBar}>
               <Toolbar>
-                {taskDetailState.type !== "NEW" && (
+                {taskDetail.type !== "NEW" && (
                   <Typography variant="h3" className={classes.title}>
                     {detail.data?.task?.name ?? "Nueva Tarea"}
                   </Typography>
@@ -289,19 +319,20 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
                   </Grid>
                 </List>
               )}
-              {taskDetailState.type == "NEW" && (
-                <List>
-                  <TextField
-                    label="Nombre De Tarea"
-                    fullWidth
-                    rows={4}
-                    variant="outlined"
-                    name="name"
-                    value={formValues.name}
-                    onChange={handleInputChange}
-                  />
-                </List>
-              )}
+              {taskDetail.type == "NEW" ||
+                (taskDetail.type == "EDIT" && (
+                  <List>
+                    <TextField
+                      label="Nombre De Tarea"
+                      fullWidth
+                      rows={4}
+                      variant="outlined"
+                      name="name"
+                      value={formValues.name}
+                      onChange={handleInputChange}
+                    />
+                  </List>
+                ))}
               <List>
                 <TextField
                   id="outlined-multiline-static"
@@ -320,8 +351,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
                   onChange={handleInputChange}
                 />
               </List>
-              {(taskDetailState.type === "NEW" ||
-                taskDetailState.type === "EDIT") && (
+              {(taskDetail.type === "NEW" || taskDetail.type === "EDIT") && (
                 <>
                   <List>
                     <FormControl
@@ -402,7 +432,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
               )}
               {isDetail && <Timer {...{ detail }} />}
             </DialogContent>
-            {taskDetailState.type == "NEW" ? (
+            {taskDetail.type == "NEW" && (
               <DialogActions className={classes.leftAlignDialogActions}>
                 <Button
                   variant="contained"
@@ -412,7 +442,19 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
                   Agregar Tarea
                 </Button>
               </DialogActions>
-            ) : (
+            )}
+            {taskDetail.type == "EDIT" && (
+              <DialogActions className={classes.leftAlignDialogActions}>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => onSaveEdit()}
+                >
+                  Guardar Tarea
+                </Button>
+              </DialogActions>
+            )}
+            {isDetail && (
               <DialogActions className={classes.leftAlignDialogActions}>
                 <Button
                   variant="contained"
@@ -421,7 +463,9 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
                 >
                   Eliminar Tarea
                 </Button>
-                <Button variant="contained">Editar Tarea</Button>
+                <Button variant="contained" onClick={() => onEdistTask()}>
+                  Editar Tarea
+                </Button>
               </DialogActions>
             )}
           </>

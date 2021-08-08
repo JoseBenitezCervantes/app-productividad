@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
 import PauseIcon from "@material-ui/icons/Pause";
 import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
-import { Grid, IconButton, List, makeStyles } from "@material-ui/core";
+import { Button, Grid, IconButton, List, makeStyles } from "@material-ui/core";
 import { useTimer } from "react-timer-hook";
+import Swal from "sweetalert2";
+import { formatTimeString } from "../../../misc/formatData";
 
 const useStyles = makeStyles((theme) => ({
   leftAlignDialogActions: {
@@ -42,34 +44,35 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Timer = ({ detail }) => {
+const Timer = ({ detail, setTaskDetail, taskDetail }) => {
   const { task } = detail.data;
 
   // Inicializa los tiempos del timer
   const restHrs = task?.restTime[0];
   const restMin = task?.restTime[1];
+  const restSec = task?.restTime[2];
   const classes = useStyles();
   const timeI = new Date();
   timeI.setHours(timeI.getHours() + restHrs);
   timeI.setMinutes(timeI.getMinutes() + restMin);
+  timeI.setSeconds(timeI.getSeconds() + restSec);
   const { seconds, minutes, hours, start, isRunning, pause, restart } =
     useTimer({
       expiryTimestamp: timeI,
       autoStart: false,
     });
 
-
   //Actualiza el tiempo y el estatus de la tarea
   const updateStatus = (statusTask) => {
     fetch(`${process.env.REACT_APP_SERVER_ARKON}/api/tasks/update`, {
       method: "PUT",
       body: JSON.stringify({
-        restTime: [hours, minutes],
+        restTime: [hours, minutes, seconds],
         id: task?._id,
         statusTask,
         name: task.name,
         description: task.description,
-        initialTime: task.initialTime
+        initialTime: task.initialTime,
       }),
       headers: { "Content-Type": "application/json" },
     });
@@ -79,20 +82,37 @@ const Timer = ({ detail }) => {
   useEffect(() => {
     if ((seconds === 30 || seconds === 0) && isRunning) {
       updateStatus("RUN");
-    } 
-    if(minutes === 0 && seconds === 0){
+    }
+    if (minutes === 0 && seconds === 0) {
       updateStatus("FINISH");
     }
   }, [seconds]);
 
+  //Finaliza una tarea
+  const onFinishTask = () => {
+    updateStatus("FINISH");
+    setTaskDetail({ ...taskDetail, isOpen: false });
+    Swal.fire("Buen Trabajo!", "Tarea Finalizada!", "success").then(() => {
+      window.location.href = "/admin/tasks";
+    });
+  };
+
+  const formatTimer = formatTimeString(hours, minutes, seconds);
   return (
     <div>
       <List>
         <Grid container spacing={1} className={classes.timerIcons}>
           <Grid item xs={12}>
-            <h1 className={classes.fontTime}>{`0${hours}:${
-              minutes.toString().length === 1 ? `0${minutes}` : minutes
-            }:${seconds}`}</h1>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => onFinishTask()}
+            >
+              Terminar Tarea
+            </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <h1 className={classes.fontTime}>{formatTimer}</h1>
           </Grid>
           <Grid item xs={4} className={classes.playIcon}>
             <IconButton
@@ -118,8 +138,12 @@ const Timer = ({ detail }) => {
             <IconButton
               onClick={() => {
                 const timeRestart = new Date();
-                timeRestart.setHours(timeRestart.getHours() + restHrs);
-                timeRestart.setMinutes(timeRestart.getMinutes() + restMin);
+                const initHrs = task?.initialTime[0];
+                const initMin = task?.initialTime[1];
+                const initSec = task?.initialTime[2];
+                timeRestart.setHours(timeRestart.getHours() + initHrs);
+                timeRestart.setMinutes(timeRestart.getMinutes() + initMin);
+                timeRestart.setSeconds(timeRestart.getSeconds() + initSec);
                 updateStatus("RUN");
                 restart(timeRestart);
               }}

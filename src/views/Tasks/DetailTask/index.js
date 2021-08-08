@@ -22,6 +22,7 @@ import { DialogContent } from "@material-ui/core";
 import { useForm } from "../../../hooks/useForm";
 import Timer from "../Timer";
 import Alert from "@material-ui/lab/Alert";
+import Swal from "sweetalert2";
 
 const useStyles = makeStyles((theme) => ({
   leftAlignDialogActions: {
@@ -98,7 +99,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     isShow: false,
     isError: false,
   });
-  const [formValues, handleInputChange, reset] = useForm({
+  const [formValues, handleInputChange] = useForm({
     name: "",
     description: detail.data?.task?.description ?? "",
   });
@@ -152,8 +153,8 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
           body: JSON.stringify({
             name: formValues.name,
             description: formValues.description,
-            initialTime: [time.hours, time.minutes],
-            restTime: [time.hours, time.minutes],
+            initialTime: [time.hours, time.minutes, 0],
+            restTime: [time.hours, time.minutes, 0],
           }),
           headers: { "Content-Type": "application/json" },
         }
@@ -161,14 +162,10 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
       const result = await response.json();
       //Si la tarea se agrego se muestra un mensaje
       if (result.msg === "Tarea agregada") {
-        setMessage({
-          msg: "Tarea Agregada",
-          isShow: true,
-          isError: false,
-        });
-        setTimeout(() => {
+        setTaskDetail({ ...taskDetail, isOpen: false });
+        Swal.fire("Buen Trabajo!", "Tarea Agregada!", "success").then(() => {
           window.location.href = "/admin/tasks";
-        }, 1000);
+        });
       }
     }
   };
@@ -179,14 +176,10 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     const response = await fetch(url, { method: "DELETE" });
     const result = await response.json();
     if (result) {
-      setMessage({
-        msg: "Tarea Eliminada",
-        isShow: true,
-        isError: false,
-      });
-      setTimeout(() => {
+      setTaskDetail({ ...taskDetail, isOpen: false });
+      Swal.fire("Eliminada!", "Tarea Eliminada!", "success").then(() => {
         window.location.href = "/admin/tasks";
-      }, 1000);
+      });
     }
   };
 
@@ -199,8 +192,8 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
           body: JSON.stringify({
             name: formValues.name,
             description: formValues.description,
-            initialTime: [time.hours, time.minutes],
-            restTime: [time.hours, time.minutes],
+            initialTime: [time.hours, time.minutes, 0],
+            restTime: [time.hours, time.minutes, 0],
             id: taskDetail.data,
             statusTask: "PAUSE",
           }),
@@ -208,10 +201,12 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
         }
       );
       const response = await result.json();
-      console.log(
-        "🚀 ~ file: index.js ~ line 242 ~ onSaveEdit ~ response",
-        response
-      );
+      if (response.msg === "Tarea actualizada") {
+        setTaskDetail({ ...taskDetail, isOpen: false });
+        Swal.fire("Actualizacion!", "Tarea Actualizada!", "success").then(() => {
+          window.location.href = "/admin/tasks";
+        });
+      }
     }
   };
 
@@ -230,13 +225,13 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     setEditTime(false);
   };
 
-  //Permite editar el tiempo  
+  //Permite editar el tiempo
   const onClickEditable = () => {
     setTime({ hours: 0, minutes: 0, valueSize: "" });
     setEditTime(!editTime);
   };
 
-   // Funcion para guardar los tiempos
+  // Funcion para guardar los tiempos
   const onEditTime = (event) => {
     const valueSize = event.target.value;
     setTime({ hours: valueSize, minutes: 0, valueSize: "" });
@@ -269,7 +264,13 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
                     {detail.data?.task?.name ?? "Nueva Tarea"}
                   </Typography>
                 )}
-                <Button autoFocus color="white" onClick={() => setTaskDetail({ data: "", isOpen: false, type: "" })}>
+                <Button
+                  autoFocus
+                  color="white"
+                  onClick={() =>
+                    setTaskDetail({ data: "", isOpen: false, type: "" })
+                  }
+                >
                   <Typography
                     variant="h6"
                     className={classes.exit}
@@ -314,7 +315,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
                             margin="dense"
                             name="name"
                             disabled
-                            value={`0${detail.data?.task?.initialTime[0]}:${detail.data?.task?.initialTime[1]}`}
+                            value={`0${detail.data?.task?.initialTime[0]}:${detail.data?.task?.initialTime[1]}:${detail.data?.task?.initialTime[2]}`}
                             onChange={handleInputChange}
                           />
                         </Grid>
@@ -433,7 +434,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
                   )}
                 </>
               )}
-              {isDetail && <Timer {...{ detail }} />}
+              {isDetail && <Timer {...{ detail, setTaskDetail, taskDetail }} />}
             </DialogContent>
             {isNew && (
               <DialogActions className={classes.leftAlignDialogActions}>

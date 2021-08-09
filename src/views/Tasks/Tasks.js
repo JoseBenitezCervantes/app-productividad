@@ -161,7 +161,7 @@ const Tasks = () => {
     id: x._id,
     name: x.name,
     description: x.description,
-    creationDate: x.creationDate,
+    creationDate: x.creationDate.substr(0,10),
     initialTime: formatTimeString(x?.initialTime[0],x?.initialTime[1],x?.initialTime[2]),
     restTime: formatTimeString(x?.restTime[0],x?.restTime[1],x?.restTime[2]),
     duration: getDuration(x?.initialTime),

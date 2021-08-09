@@ -126,7 +126,15 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     }
     if (time.hours === 0 && time.minutes === 0) {
       setMessage({
-        msg: "Agrege Tiempoo",
+        msg: "Agrege Tiempo",
+        isShow: true,
+        isError: true,
+      });
+      return false;
+    }
+    if (time.hours === 2 && time.minutes > 0) {
+      setMessage({
+        msg: "Tiempo Maximo de 2 Hrs",
         isShow: true,
         isError: true,
       });
@@ -254,7 +262,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
         aria-describedby="alert-dialog-slide-description"
       >
         {detail.loading || detail.error ? (
-          <h1>Loading...</h1>
+          <h2>Loading...</h2>
         ) : (
           <>
             <AppBar className={classes.appBar}>

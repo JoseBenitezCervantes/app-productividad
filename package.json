@@ -22,11 +22,12 @@
     "react-timer-hook": "^3.0.4",
     "sweetalert2": "^11.1.2",
     "victory": "^35.10.0",
-    "web-vitals": "^1.1.2"
+    "web-vitals": "^1.1.2",
+    "copyfiles": "^2.3.0"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && copyfiles netlify.toml ./build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

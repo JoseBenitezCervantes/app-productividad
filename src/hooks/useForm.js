@@ -1,25 +1,27 @@
-import { useState } from "react"
+import { useState } from "react";
 
 // Custom hook para obtener datos de los imput
 
-export const useForm = ( initialState = {} ) => {
-    
-    const [values, setValues] = useState(initialState);
+export const useForm = (initialState = {}) => {
+  const [values, setValues] = useState(initialState);
 
-    const reset = () => {
-        setValues( initialState );
-    }
+  //Reinicia al initialState 
+  const reset = () => {
+    setValues(initialState);
+  };
 
+  //Toma el valor del input
+  const handleInputChange = ({ target }) => {
+    setValues({
+      ...values,
+      [target.name]: target.value,
+    });
+  };
 
-    const handleInputChange = ({ target }) => {
+  //Cambia los valores directamente al state
+  const handleCustomValues = (value) => {
+    setValues(value);
+  };
 
-        setValues({
-            ...values,
-            [ target.name ]: target.value
-        });
-
-    }
-
-    return [ values, handleInputChange, reset ];
-
-}
+  return [values, handleInputChange, reset, handleCustomValues];
+};

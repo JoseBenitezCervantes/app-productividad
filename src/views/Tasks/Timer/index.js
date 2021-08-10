@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     minWidth: 120,
   },
   fontTime: {
-    fontSize: "10rem",
+    fontSize: "6rem",
   },
   timerIcons: {
     textAlign: "center",
@@ -112,7 +112,7 @@ const Timer = ({ detail, setTaskDetail, taskDetail }) => {
             </Button>
           </Grid>
           <Grid item xs={12}>
-            <h1 className={classes.fontTime}>{formatTimer}</h1>
+            <h4 className={classes.fontTime}>{formatTimer}</h4>
           </Grid>
           <Grid item xs={4} className={classes.playIcon}>
             <IconButton

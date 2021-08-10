@@ -79,6 +79,10 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     error: false,
     loading: isDetail,
   });
+  const [formValues, handleInputChange, reset, handleCustomValues] = useForm({
+    name: "",
+    description: "",
+  });
   //Obtiene el detalle de la tarea y la carga al state
   useEffect(() => {
     const getData = async () => {
@@ -99,10 +103,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
     isShow: false,
     isError: false,
   });
-  const [formValues, handleInputChange] = useForm({
-    name: "",
-    description: detail.data?.task?.description ?? "",
-  });
+  
   const [time, setTime] = useState({
     hours: 0,
     minutes: 30,
@@ -247,6 +248,10 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
 
   //Permite editar la tarea
   const onEdistTask = () => {
+    handleCustomValues({
+      name: detail.data?.task?.name ?? "",
+      description: detail.data?.task?.description ?? "",
+    })
     setTaskDetail({ ...taskDetail, type: "EDIT" });
   };
 
@@ -311,7 +316,7 @@ const DetailTask = ({ setTaskDetail, taskDetail }) => {
                             name="name"
                             margin="dense"
                             disabled
-                            value={detail.data?.task?.creationDate}
+                            value={detail.data?.task?.creationDate.substr(0,10)}
                             onChange={handleInputChange}
                           />
                         </Grid>

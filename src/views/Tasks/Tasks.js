@@ -121,6 +121,7 @@ const Tasks = () => {
     print: false,
     download: false,
     toolbar: false,
+    filter: false,
     textLabels: {
       body: {
         noMatch: "No se encontro",
@@ -169,7 +170,7 @@ const Tasks = () => {
 
   return (
     <MuiThemeProvider theme={getMuiTheme()}>
-      <h1>Admin Tareas</h1>
+      <h1>Tareas Pendientes</h1>
 
       <Box display="flex" flexDirection="row-reverse" margin={"1rem"}>
         <Button
